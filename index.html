@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Conjuntos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: calc(100vh - 80px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .help-btn {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .help-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .input-section, .operations-section {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #4a5568;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+        }
+
+        .operation-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .operation-inputs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .operation-inputs select {
+            padding: 8px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .results-section {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .result-item {
+            background: #f7fafc;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+
+        .result-item h4 {
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .result-item p {
+            color: #4a5568;
+            margin: 5px 0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 20px;
+            top: 15px;
+        }
+
+        .close:hover {
+            color: #667eea;
+        }
+
+        .footer {
+            background: rgba(0,0,0,0.8);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .github-link {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.3s ease;
+        }
+
+        .github-link:hover {
+            color: #667eea;
+        }
+
+        .error {
+            color: #e53e3e;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .help-btn {
+                bottom: 90px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="help-btn" onclick="openHelpModal()" title="Ayuda">?</button>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🧮 Calculadora de Conjuntos</h1>
+            <p>Realiza operaciones matemáticas con conjuntos de forma visual e interactiva</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">📝 Definición de Conjuntos</h2>
+                
+                <div class="input-group">
+                    <label for="universal">Conjunto Universal (U):</label>
+                    <input type="text" id="universal" placeholder="Ej: 1,2,3,4,5,6,7,8,9,10">
+                    <div id="universal-error" class="error"></div>
+                </div>
+
+                <div class="input-group">
+                    <label for="conjuntoA">Conjunto A:</label>
+                    <input type="text" id="conjuntoA" placeholder="Ej: 1,2,3">
+                    <div id="conjuntoA-error" class="error"></div>
+                </div>
+
+                <div class="input-group">
+                    <label for="conjuntoB">Conjunto B:</label>
+                    <input type="text" id="conjuntoB" placeholder="Ej: 3,4,5">
+                    <div id="conjuntoB-error" class="error"></div>
+                </div>
+
+                <div class="input-group">
+                    <label for="conjuntoC">Conjunto C:</label>
+                    <input type="text" id="conjuntoC" placeholder="Ej: 2,4,6">
+                    <div id="conjuntoC-error" class="error"></div>
+                </div>
+
+                <div class="input-group">
+                    <label for="conjuntoD">Conjunto D:</label>
+                    <input type="text" id="conjuntoD" placeholder="Ej: 1,3,5">
+                    <div id="conjuntoD-error" class="error"></div>
+                </div>
+
+                <button class="btn btn-secondary" onclick="generateRandomSets()">🎲 Generar Conjuntos Aleatorios</button>
+                <button class="btn btn-danger" onclick="clearAll()">🗑️ Limpiar Todo</button>
+            </div>
+
+            <div class="operations-section">
+                <h2 class="section-title">⚙️ Operaciones</h2>
+                
+                <h3>Operaciones Básicas:</h3>
+                <div class="operation-buttons">
+                    <button class="btn" onclick="performOperation('union', 'A', 'B')">A ∪ B</button>
+                    <button class="btn" onclick="performOperation('intersection', 'A', 'B')">A ∩ B</button>
+                    <button class="btn" onclick="performOperation('difference', 'A', 'B')">A - B</button>
+                    <button class="btn" onclick="performOperation('union', 'A', 'C')">A ∪ C</button>
+                    <button class="btn" onclick="performOperation('intersection', 'A', 'C')">A ∩ C</button>
+                    <button class="btn" onclick="performOperation('difference', 'A', 'C')">A - C</button>
+                </div>
+
+                <h3>Operaciones entre Conjuntos:</h3>
+                <div class="operation-inputs">
+                    <select id="set1">
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                    </select>
+                    <select id="operation">
+                        <option value="union">∪ (Unión)</option>
+                        <option value="intersection">∩ (Intersección)</option>
+                        <option value="difference">- (Diferencia)</option>
+                        <option value="symmetric">△ (Diferencia Simétrica)</option>
+                    </select>
+                    <select id="set2">
+                        <option value="A">A</option>
+                        <option value="B" selected>B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                    </select>
+                    <button class="btn" onclick="performBinaryOperation()">Calcular</button>
+                </div>
+
+                <h3>Operaciones Múltiples:</h3>
+                <div class="operation-buttons">
+                    <button class="btn" onclick="performOperation('unionAll')">A ∪ B ∪ C ∪ D</button>
+                    <button class="btn" onclick="performOperation('intersectionAll')">A ∩ B ∩ C ∩ D</button>
+                    <button class="btn" onclick="performOperation('differenceAll')">A - B - C - D</button>
+                    <button class="btn" onclick="performOperation('symmetricDifferenceAll')">A △ B △ C △ D</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section">
+            <h2 class="section-title">📊 Resultados</h2>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <!-- Modal de Ayuda -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeHelpModal()">&times;</span>
+            <h2>📚 Guía de Uso - Calculadora de Conjuntos</h2>
+            
+            <h3>🔍 Cómo usar la calculadora:</h3>
+            <ol>
+                <li><strong>Definir Conjuntos:</strong> Ingresa elementos separados por comas (ej: 1,2,3,4)</li>
+                <li><strong>Conjunto Universal:</strong> Debe contener todos los elementos de los subconjuntos</li>
+                <li><strong>Operaciones:</strong> Selecciona los conjuntos y la operación deseada</li>
+                <li><strong>Resultados:</strong> Se muestran en extensión {1,2,3} y comprensión</li>
+            </ol>
+
+            <h3>🧮 Operaciones Disponibles:</h3>
+            <ul>
+                <li><strong>A'</strong> - Complemento de A</li>
+                <li><strong>A ∪ B</strong> - Unión de A y B</li>
+                <li><strong>A ∩ B</strong> - Intersección de A y B</li>
+                <li><strong>A - B</strong> - Diferencia de A y B</li>
+                <li><strong>A △ B</strong> - Diferencia simétrica</li>
+            </ul>
+
+            <h3>💡 Consejos:</h3>
+            <ul>
+                <li>Los elementos deben ser únicos en cada conjunto</li>
+                <li>Usa números o letras (sin espacios en elementos individuales)</li>
+                <li>El conjunto universal debe incluir todos los elementos</li>
+                <li>Usa el botón 🎲 para generar conjuntos aleatorios</li>
+                <li><strong>Caracteres permitidos:</strong> solo números, letras, comas y espacios. <br> No se permiten símbolos especiales como @, #, $, %, etc.</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <span>Elaborado por Gabriel Espinoza</span>
+        <a href="https://github.com/Gabrie1HK" target="_blank" class="github-link">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+            GitHub
+        </a>
+    </footer>
+
+    <script>
+        // Variables globales para almacenar los conjuntos
+        let conjuntos = {
+            U: new Set(),
+            A: new Set(),
+            B: new Set(),
+            C: new Set(),
+            D: new Set()
+        };
+
+        // Función para validar y parsear conjuntos con mejor manejo de errores
+        function parseSet(input) {
+            if (!input || !input.trim()) return new Set();
+            // Convertir todo a string sin espacios extra y filtrar vacíos
+            const elements = input.split(',')
+                .map(elem => elem.trim())
+                .filter(elem => elem !== '' && elem.length > 0)
+                .map(elem => String(elem));
+            // Remover duplicados automáticamente con Set
+            return new Set(elements);
+        }
+
+        // Validar caracteres especiales en los conjuntos
+        function hasInvalidCharacters(input) {
+            const invalidCharPattern = /[^a-zA-Z0-9,\s]/; // Permitir solo letras, números, comas y espacios
+            return invalidCharPattern.test(input);
+        }
+
+        // Función para validar conjuntos con mensajes mejorados
+        function validateSets() {
+            const inputs = ['universal', 'conjuntoA', 'conjuntoB', 'conjuntoC', 'conjuntoD'];
+            const labels = ['U', 'A', 'B', 'C', 'D'];
+            let isValid = true;
+
+            // Limpiar errores previos
+            inputs.forEach(inputId => {
+                const errorDiv = document.getElementById(inputId + '-error');
+                errorDiv.textContent = '';
+            });
+
+            const universalInput = document.getElementById('universal').value.trim();
+            if (!universalInput) {
+                document.getElementById('universal-error').textContent = 'El conjunto universal es requerido';
+                isValid = false;
+                return false;
+            }
+
+            if (hasInvalidCharacters(universalInput)) {
+                document.getElementById('universal-error').textContent = 'El conjunto universal contiene caracteres no válidos';
+                isValid = false;
+                return false;
+            }
+
+            const universal = parseSet(universalInput);
+            if (universal.size === 0) {
+                document.getElementById('universal-error').textContent = 'El conjunto universal no puede estar vacío';
+                isValid = false;
+                return false;
+            }
+
+            inputs.slice(1).forEach((inputId, index) => {
+                const input = document.getElementById(inputId);
+                const errorDiv = document.getElementById(inputId + '-error');
+                const value = input.value.trim();
+
+                if (value) {
+                    if (hasInvalidCharacters(value)) {
+                        errorDiv.textContent = `El conjunto ${labels[index]} contiene caracteres no válidos`;
+                        isValid = false;
+                        return;
+                    }
+
+                    const set = parseSet(value);
+
+                    // Verificar que todos los elementos estén en el conjunto universal
+                    for (let elem of set) {
+                        if (!universal.has(elem)) {
+                            errorDiv.textContent = `El elemento "${elem}" no está en el conjunto universal`;
+                            isValid = false;
+                            break;
+                        }
+                    }
+                }
+            });
+
+            return isValid;
+        }
+
+        // Validar que los conjuntos seleccionados para operaciones estén definidos
+        function validateOperationSets(set1, set2) {
+            if (conjuntos[set1].size === 0) {
+                alert(`El conjunto ${set1} está vacío. Por favor, defínelo antes de realizar la operación.`);
+                return false;
+            }
+
+            if (conjuntos[set2].size === 0) {
+                alert(`El conjunto ${set2} está vacío. Por favor, defínelo antes de realizar la operación.`);
+                return false;
+            }
+
+            return true;
+        }
+
+        // Función para actualizar conjuntos
+        function updateSets() {
+            // Validar solo si hay conjuntos definidos
+            const universalValue = document.getElementById('universal').value.trim();
+            if (!universalValue) {
+                document.getElementById('universal-error').textContent = 'El conjunto universal es requerido para realizar operaciones';
+                return false;
+            }
+
+            if (!validateSets()) return false;
+
+            conjuntos.U = parseSet(document.getElementById('universal').value);
+            conjuntos.A = parseSet(document.getElementById('conjuntoA').value);
+            conjuntos.B = parseSet(document.getElementById('conjuntoB').value);
+            conjuntos.C = parseSet(document.getElementById('conjuntoC').value);
+            conjuntos.D = parseSet(document.getElementById('conjuntoD').value);
+            
+            return true;
+        }
+
+        // Operaciones de conjuntos
+        function union(setA, setB) {
+            return new Set([...setA, ...setB]);
+        }
+
+        function intersection(setA, setB) {
+            return new Set([...setA].filter(x => setB.has(x)));
+        }
+
+        function difference(setA, setB) {
+            return new Set([...setA].filter(x => !setB.has(x)));
+        }
+
+        function complement(setA, universal) {
+            return difference(universal, setA);
+        }
+
+        function symmetricDifference(setA, setB) {
+            return union(difference(setA, setB), difference(setB, setA));
+        }
+
+        // Función para mostrar resultados
+        function displayResult(title, resultSet, operation = '') {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'result-item';
+            // Filtrar elementos vacíos y ordenar numéricamente si es posible
+            let extensionArr = Array.from(resultSet).filter(e => e !== '' && e !== undefined);
+            // Si todos son números, ordenar como números
+            if (extensionArr.every(e => /^\d+$/.test(e))) {
+                extensionArr = extensionArr.map(Number).sort((a, b) => a - b).map(String);
+            } else {
+                extensionArr = extensionArr.sort();
+            }
+            const extension = extensionArr.join(', ');
+            const extensionFormat = resultSet.size === 0 ? '∅' : `{${extension}}`;
+            let comprehension = '';
+            if (operation) {
+                comprehension = `{x | x ${operation}}`;
+            } else {
+                comprehension = 'Resultado de la operación';
+            }
+            resultDiv.innerHTML = `
+                <h4>${title}</h4>
+                <p><strong>Por extensión:</strong> ${extensionFormat}</p>
+                <p><strong>Por comprensión:</strong> ${comprehension}</p>
+                <p><strong>Cardinalidad del resultado:</strong> ${extensionArr.length}</p>
+            `;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        // Función para realizar operaciones
+        function performOperation(operation, set1 = null, set2 = null) {
+            if (!updateSets()) return;
+
+            let result;
+            let title;
+            let comprensionText = '';
+            
+            if (set1 && set2) {
+                // Operaciones básicas con dos conjuntos específicos
+                switch (operation) {
+                    case 'union':
+                        result = union(conjuntos[set1], conjuntos[set2]);
+                        title = `${set1} ∪ ${set2}`;
+                        comprensionText = `∈ ${set1} ∨ x ∈ ${set2}`;
+                        break;
+                    case 'intersection':
+                        result = intersection(conjuntos[set1], conjuntos[set2]);
+                        title = `${set1} ∩ ${set2}`;
+                        comprensionText = `∈ ${set1} ∧ x ∈ ${set2}`;
+                        break;
+                    case 'difference':
+                        result = difference(conjuntos[set1], conjuntos[set2]);
+                        title = `${set1} - ${set2}`;
+                        comprensionText = `∈ ${set1} ∧ x ∉ ${set2}`;
+                        break;
+                }
+                displayResult(title, result, comprensionText);
+                return;
+            }
+            
+            // Operaciones especiales
+            switch (operation) {
+                case 'complement':
+                    const comp = complement(conjuntos[set1], conjuntos.U);
+                    displayResult(`${set1}'`, comp, `∈ U ∧ x ∉ ${set1}`);
+                    break;
+                case 'unionAll':
+                    const unionResult = union(union(union(conjuntos.A, conjuntos.B), conjuntos.C), conjuntos.D);
+                    displayResult('A ∪ B ∪ C ∪ D', unionResult, '∈ A ∨ x ∈ B ∨ x ∈ C ∨ x ∈ D');
+                    break;
+                case 'intersectionAll':
+                    const intersectionResult = intersection(intersection(intersection(conjuntos.A, conjuntos.B), conjuntos.C), conjuntos.D);
+                    displayResult('A ∩ B ∩ C ∩ D', intersectionResult, '∈ A ∧ x ∈ B ∧ x ∈ C ∧ x ∈ D');
+                    break;
+                case 'differenceAll':
+                    const differenceResult = difference(difference(difference(conjuntos.A, conjuntos.B), conjuntos.C), conjuntos.D);
+                    displayResult('A - B - C - D', differenceResult, '∈ A ∧ x ∉ B ∧ x ∉ C ∧ x ∉ D');
+                    break;
+                case 'symmetricDifferenceAll':
+                    const symmetricDifferenceResult = symmetricDifference(symmetricDifference(symmetricDifference(conjuntos.A, conjuntos.B), conjuntos.C), conjuntos.D);
+                    displayResult('A △ B △ C △ D', symmetricDifferenceResult, '∈ (A ∪ B ∪ C ∪ D) ∧ x ∉ (A ∩ B ∩ C ∩ D)');
+                    break;
+            }
+        }
+
+        // Función para operaciones binarias
+        function performBinaryOperation() {
+            if (!updateSets()) return;
+
+            const set1 = document.getElementById('set1').value;
+            const set2 = document.getElementById('set2').value;
+            const operation = document.getElementById('operation').value;
+
+            if (!validateOperationSets(set1, set2)) return;
+
+            let result;
+            let title;
+            let comprensionText = '';
+            
+            switch (operation) {
+                case 'union':
+                    result = union(conjuntos[set1], conjuntos[set2]);
+                    title = `${set1} ∪ ${set2}`;
+                    comprensionText = `∈ ${set1} ∨ x ∈ ${set2}`;
+                    break;
+                case 'intersection':
+                    result = intersection(conjuntos[set1], conjuntos[set2]);
+                    title = `${set1} ∩ ${set2}`;
+                    comprensionText = `∈ ${set1} ∧ x ∈ ${set2}`;
+                    break;
+                case 'difference':
+                    result = difference(conjuntos[set1], conjuntos[set2]);
+                    title = `${set1} - ${set2}`;
+                    comprensionText = `∈ ${set1} ∧ x ∉ ${set2}`;
+                    break;
+                case 'symmetric':
+                    result = symmetricDifference(conjuntos[set1], conjuntos[set2]);
+                    title = `${set1} △ ${set2}`;
+                    comprensionText = `∈ (${set1} ∪ ${set2}) ∧ x ∉ (${set1} ∩ ${set2})`;
+                    break;
+            }
+            
+            displayResult(title, result, comprensionText);
+        }
+
+        // Función para generar conjuntos aleatorios mejorada
+        function generateRandomSets() {
+            // Generar conjunto universal de 8 a 15 elementos
+            const universalSize = 8 + Math.floor(Math.random() * 8);
+            const universal = Array.from({length: universalSize}, (_, i) => i + 1);
+            document.getElementById('universal').value = universal.join(',');
+            
+            // Generar subconjuntos aleatorios garantizando que estén en el universal
+            const sets = ['conjuntoA', 'conjuntoB', 'conjuntoC', 'conjuntoD'];
+            
+            sets.forEach(setId => {
+                const maxSize = Math.min(6, universal.length);
+                const size = 1 + Math.floor(Math.random() * maxSize); // Al menos 1 elemento
+                const subset = [];
+                const available = [...universal];
+                
+                // Seleccionar elementos aleatorios sin repetición
+                for (let i = 0; i < size && available.length > 0; i++) {
+                    const randomIndex = Math.floor(Math.random() * available.length);
+                    subset.push(available.splice(randomIndex, 1)[0]);
+                }
+                
+                document.getElementById(setId).value = subset.sort((a, b) => a - b).join(',');
+            });
+            
+            // Limpiar resultados anteriores y errores
+            document.getElementById('results').innerHTML = '';
+            const errorDivs = document.querySelectorAll('.error');
+            errorDivs.forEach(div => div.textContent = '');
+        }
+
+        // Función para limpiar todo
+        function clearAll() {
+            document.getElementById('universal').value = '';
+            document.getElementById('conjuntoA').value = '';
+            document.getElementById('conjuntoB').value = '';
+            document.getElementById('conjuntoC').value = '';
+            document.getElementById('conjuntoD').value = '';
+            document.getElementById('results').innerHTML = '';
+            
+            // Limpiar errores
+            const errorDivs = document.querySelectorAll('.error');
+            errorDivs.forEach(div => div.textContent = '');
+        }
+
+        // Funciones del modal de ayuda
+        function openHelpModal() {
+            document.getElementById('helpModal').style.display = 'block';
+        }
+
+        function closeHelpModal() {
+            document.getElementById('helpModal').style.display = 'none';
+        }
+
+        // Cerrar modal con tecla Escape también
+        window.onclick = function(event) {
+            const modal = document.getElementById('helpModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Cerrar modal con tecla Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('helpModal');
+                if (modal.style.display === 'block') {
+                    modal.style.display = 'none';
+                }
+            }
+        });
+
+        // Validación en tiempo real
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input[type="text"]');
+            inputs.forEach(input => {
+                input.addEventListener('blur', validateSets);
+            });
+        });
+    </script>
+</body>
+</html>
